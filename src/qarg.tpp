@@ -5,7 +5,7 @@
 #include <cctype>
 
 namespace qarg {
-  template <typename T> type_hint tohint() { return type_hint::NONE; }
+  template <typename T> type_hint tohint();
   template <> type_hint tohint<bool>() { return type_hint::BOOL; }
   template <> type_hint tohint<int>() { return type_hint::INT; }
   template <> type_hint tohint<double>() { return type_hint::FLOAT; }
@@ -14,9 +14,14 @@ namespace qarg {
 
   template <typename T>
   void parser::add(
-    const char c, const bool r, const std::string d
+    const char c, const std::string d, const bool r
   ) {
-    spec[c] = {r, d, tohint<T>()};
+    auto h = tohint<T>();
+
+    spec[c].description = d;
+    spec[c].hint = h;
+    spec[c].requires_arg = (h != type_hint::BOOL);
+    spec[c].is_required = r;
   }
 
   // convert option to type T

@@ -1,6 +1,13 @@
 #include <iostream>
+#include <sstream>
+#include <string_view>
 
 #include "qarg.hpp"
+
+constexpr std::string_view expected = (
+  "NO ARG X\n"
+  "y == 12\n"
+);
 
 int main([[maybe_unused]] int argc, const char *argv[]) {
   int c = 3;
@@ -12,13 +19,12 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
 
   std::cout << "+----------------------------------------------------------\n";
   std::cout << "| expected output:\n";
-  std::cout << "| NO ARG X\n";
-  std::cout << "| y == 12\n";
+  std::cout << expected;
   std::cout << "\n";
 
   qarg::parser argp;
-  argp.add('x', false);
-  argp.add('y', true);
+  argp.add<int>('x', "x coord");
+  argp.add<int>('y', "y coord", true);
 
   try {
     argp.parse(c, v);
@@ -27,19 +33,27 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
     return 1;
   }
 
+  std::stringstream ss;
+
   auto x = argp('x');
   if (x) {
-    std::cout << "x == " << *x << "\n";
+    ss << "x == " << *x << "\n";
   } else {
-    std::cout << "NO ARG X" << "\n";
+    ss << "NO ARG X\n";
   }
 
   auto y = argp('y');
   if (y) {
-    std::cout << "y == " << *y << "\n";
+    ss << "y == " << *y << "\n";
   } else {
-    std::cout << "NO ARG Y" << "\n";
+    ss << "NO ARG Y\n";
   }
 
-  return 0;
+  std::cout << ss.str();
+
+  if (ss.str() == expected) {
+    return 0;
+  }
+
+  return 1;
 }

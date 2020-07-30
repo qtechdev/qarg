@@ -1,6 +1,14 @@
 #include <iostream>
+#include <sstream>
+#include <string_view>
 
 #include "qarg.hpp"
+
+constexpr std::string_view expected = (
+  "h == false\n"
+  "v == true\n"
+  "(x, y) == (6, 4)\n"
+);
 
 int main([[maybe_unused]] int argc, const char *argv[]) {
   int c = 5;
@@ -16,15 +24,15 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
   std::cout << "| expected output:\n";
   std::cout << "| h == false\n";
   std::cout << "| v == true\n";
-  std::cout << "| (x, y) == (6, 9)\n";
+  std::cout << "| (x, y) == (6, 4)\n";
 
   std::cout << "\n\n";
 
   qarg::parser argp;
-  argp.add<bool>('h', false, "display this text");
-  argp.add<bool>('v', false, "verbose");
-  argp.add<int>('x', true, "x coord");
-  argp.add<int>('y', true, "y coord");
+  argp.add<bool>('h', "display this text");
+  argp.add<bool>('v', "verbose");
+  argp.add<int>('x', "x coord", true);
+  argp.add<int>('y', "y coord", true);
 
   try {
     argp.parse(c, v);
@@ -38,12 +46,18 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
   auto arg_x = argp.get<int>('x');
   auto arg_y = argp.get<int>('y');
 
-  std::cout << "h == " << std::boolalpha << *arg_h << "\n";
-  std::cout << "v == " << std::boolalpha << *arg_v << "\n";
-  std::cout << "(x, y) == (";
-  std::cout << (arg_x ? *arg_x : -1) << ", " << (arg_y ? *arg_y : -1);
-  std::cout << ")\n";
+  std::stringstream ss;
+  ss << "h == " << std::boolalpha << *arg_h << "\n";
+  ss << "v == " << std::boolalpha << *arg_v << "\n";
+  ss << "(x, y) == (";
+  ss << (arg_x ? *arg_x : -1) << ", " << (arg_y ? *arg_y : -1);
+  ss << ")\n";
 
+  std::cout << ss.str();
 
-  return 0;
+  if (ss.str() == expected) {
+    return 0;
+  }
+
+  return 1;
 }

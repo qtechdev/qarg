@@ -1,3 +1,6 @@
+
+#include <iostream>
+
 #include <cstdio>
 #include <cstring>
 #include <sstream>
@@ -15,16 +18,26 @@ std::string qarg::hinttostr(const type_hint t) {
   }
 }
 
-[[deprecated]] void qarg::parser::add(const char c, const bool r, const std::string d) {
-  spec[c] = {r, d, type_hint::NONE};
-}
-
 void qarg::parser::parse(int argc, const char *argv[]) {
   for (int i = 1; i < argc; ++i) {
     check(argv[i]);
   }
 
   flush_option();
+
+  if (spec.find('h') != spec.end() && *get<bool>('h')) {
+    return;
+  }
+
+  for (auto &[k, v] : spec) {
+    if (!v.is_required) { continue; }
+
+    if (options.find(k) == options.end()) {
+      char buf[256];
+      snprintf(buf, 256, "-%c is a required argument", k);
+      throw std::invalid_argument(buf);
+    }
+  }
 }
 
 std::optional<std::string> qarg::parser::operator()(const char c) const {

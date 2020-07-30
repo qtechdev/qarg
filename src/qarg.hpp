@@ -23,20 +23,18 @@ namespace qarg {
   };
 
   struct option {
-    bool requires_arg;
     std::string description;
     type_hint hint;
+    bool requires_arg;
+    bool is_required;
   };
 
   class parser {
   public:
-    [[deprecated]] void add(
-      const char c, const bool requires_arg, const std::string description=""
-    );
-
     template <typename T>
     void add(
-      const char c, const bool requires_arg, const std::string description=""
+      const char c, const std::string description="",
+      const bool is_required=false
     );
 
     void parse(int argc, const char *argv[]);
