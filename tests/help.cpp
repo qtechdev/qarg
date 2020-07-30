@@ -14,15 +14,15 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
   std::cout << "| options:\n";
   std::cout << "| -h            display this text\n";
   std::cout << "| -v            verbose\n";
-  std::cout << "| -x <value>    x coord\n";
-  std::cout << "| -y <value>    y coord\n";
+  std::cout << "| -x <int>      x coord\n";
+  std::cout << "| -y <int>      y coord\n";
   std::cout << "\n\n";
 
   qarg::parser argp;
-  argp.add('h', false, "display this text");
-  argp.add('v', false, "verbose");
-  argp.add('x', true, "x coord");
-  argp.add('y', true, "y coord");
+  argp.add<bool>('h', false, "display this text");
+  argp.add<bool>('v', false, "verbose");
+  argp.add<int>('x', true, "x coord");
+  argp.add<int>('y', true, "y coord");
 
   try {
     argp.parse(c, v);
