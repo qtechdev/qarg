@@ -15,15 +15,13 @@ std::string qarg::hinttostr(const type_hint t) {
   }
 }
 
-void qarg::parser::add(const char c, const bool r, const std::string d) {
+[[deprecated]] void qarg::parser::add(const char c, const bool r, const std::string d) {
   spec[c] = {r, d, type_hint::NONE};
 }
 
 void qarg::parser::parse(int argc, const char *argv[]) {
   for (int i = 1; i < argc; ++i) {
-
     check(argv[i]);
-
   }
 
   flush_option();
@@ -101,7 +99,7 @@ void qarg::parser::check(const char *arg) {
     }
 
     if (!spec.at(c).requires_arg) {
-      options[c] = "";
+      options[c] = "true";
     } else {
       current_option = c;
     }

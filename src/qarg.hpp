@@ -14,6 +14,13 @@ namespace qarg {
     FLOAT   = 4,
     STRING  = 8
   };
+  std::string hinttostr(const type_hint t);
+
+  // false values for bool conversion
+  // note: argument is converted to lowercase before comparison
+  constexpr std::array<const std::string_view, 3> falsey = {
+    "false", "f", "0"
+  };
 
   struct option {
     bool requires_arg;
@@ -21,11 +28,9 @@ namespace qarg {
     type_hint hint;
   };
 
-  std::string hinttostr(const type_hint t);
-
   class parser {
   public:
-    void add(
+    [[deprecated]] void add(
       const char c, const bool requires_arg, const std::string description=""
     );
 
@@ -37,6 +42,9 @@ namespace qarg {
     void parse(int argc, const char *argv[]);
 
     std::optional<std::string> operator()(const char c) const;
+    template <typename T>
+    std::optional<T> get(const char c) const;
+
     std::string help() const;
   private:
     std::map<char, option> spec;

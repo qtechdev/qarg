@@ -1,5 +1,8 @@
 #ifndef __QARG_TPP__
 #define __QARG_TPP__
+#include <sstream>
+#include <algorithm>
+#include <cctype>
 
 namespace qarg {
   template <typename T> type_hint tohint() { return type_hint::NONE; }
@@ -15,6 +18,58 @@ namespace qarg {
   ) {
     spec[c] = {r, d, tohint<T>()};
   }
+
+  // convert option to type T
+  template <typename T>
+  std::optional<T> parser::get(const char c) const {
+    auto s = (*this)(c);
+    if (!s) {
+      return {};
+    }
+
+    T v;
+    std::stringstream ss(*s);
+
+    ss >> v;
+
+    return {v};
+  }
+
+  // specialisation for bool
+  template <>
+  std::optional<bool> parser::get<bool>(const char c) const {
+    auto s = (*this)(c);
+    if (!s) {
+      return {false};
+    }
+
+    std::string sl = *s;
+    std::transform(
+      sl.begin(), sl.end(), sl.begin(),
+      [](unsigned char c){ return std::tolower(c); }
+    );
+
+    for (const auto &sv : falsey) {
+      if (sl == sv) {
+        return {false};
+      }
+    }
+
+    return {true};
+  }
+
+  // specialisation for string
+  template <>
+  std::optional<std::string> parser::get<std::string>(const char c)  const {
+    auto s = (*this)(c);
+    if (!s) {
+      return {};
+    }
+
+    return *s;
+  }
+
+
 }
 
 #endif // __QARG_TPP__
