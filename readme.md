@@ -5,3 +5,6 @@ POSIX command line argument parser.
 - More than one non-argument option may be grouped together.
 - An option and its argument may or may not be separated by a space.
 - Two hyphens stop the parsing of options.
+
+## TODO:
+- add mutually exclusive arguments
