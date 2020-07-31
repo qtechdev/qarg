@@ -1,4 +1,4 @@
-NAME=library
+NAME=qarg
 V_MAJOR=1
 V_MINOR=0
 V_MICRO=0
