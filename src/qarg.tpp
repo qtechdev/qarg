@@ -45,7 +45,7 @@ namespace qarg {
   std::optional<bool> parser::get<bool>(const char c) const {
     auto s = (*this)(c);
     if (!s) {
-      return {false};
+      return {};
     }
 
     std::string sl = *s;
@@ -56,7 +56,7 @@ namespace qarg {
 
     for (const auto &sv : falsey) {
       if (sl == sv) {
-        return {false};
+        return {};
       }
     }
 
