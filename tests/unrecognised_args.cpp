@@ -3,26 +3,19 @@
 
 #include "qarg.hpp"
 
-constexpr std::string_view expected = (
-  "options:\n"
-  "-h            display this text\n"
-  "-v            verbose\n"
-  "-x <int>      x coord\n"
-  "-y <int>      y coord\n"
-);
-
+constexpr std::string_view expected = "-0 is not a recognised argument";
 
 int main([[maybe_unused]] int argc, const char *argv[]) {
   int c = 2;
   const char *v[] = {
     argv[0],
-    "-h"
+    "-0"
   };
 
   std::cout << "+----------------------------------------------------------\n";
   std::cout << "| expected output:\n";
   std::cout << expected;
-  std::cout << "\n";
+  std::cout << "\n\n";
 
   qarg::parser argp;
   argp.add<bool>('h', "display this text");
@@ -34,15 +27,12 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
     argp.parse(c, v);
   } catch (std::invalid_argument &e) {
     std::cerr << e.what() << "\n";
-    return 1;
-  }
 
-  if (argp('h')) {
-    std::cout << argp.help();
-
-    if (argp.help() == expected) {
+    if (e.what() == expected) {
       return 0;
     }
+
+    return 1;
   }
 
   return 1;

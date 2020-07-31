@@ -1,4 +1,4 @@
-NAME=library
+NAME=qarg
 V_MAJOR=1
 V_MINOR=0
 V_MICRO=0
@@ -14,7 +14,7 @@ TESTS_LD_FLAGS=${LIB_VER}
 TESTS_CXX_FLAGS=-std=c++17 -Wall -Wextra -pedantic -Isrc/
 
 SOURCES=$(wildcard src/*.cpp)
-HEADERS=$(wildcard src/*.hpp)
+HEADERS=$(wildcard src/*.hpp) $(wildcard src/*.tpp)
 OBJECTS=$(patsubst src/%,build/%,${SOURCES:.cpp=.o})
 DIRS=$(sort $(dir ${OBJECTS})) build/include
 
@@ -67,7 +67,8 @@ clean:
 .PHONY: install
 install:
 	cp ${LIB_VER} /usr/local/lib
-	cp -r ${HEADERS} /usr/local/include/${NAME}
+	mkdir -p /usr/local/include/${NAME}
+	cp -r ${HEADERS} /usr/local/include/${NAME}/
 
 .PHONY: uninstall
 uninstall:

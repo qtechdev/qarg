@@ -1,3 +1,6 @@
+
+#include <iostream>
+
 #include <cstdio>
 #include <cstring>
 #include <sstream>
@@ -5,19 +8,36 @@
 
 #include "qarg.hpp"
 
-void qarg::parser::add(const char c, const bool r, const std::string d) {
-  spec[c] = {r, d};
+std::string qarg::hinttostr(const type_hint t) {
+  switch (t) {
+    case type_hint::BOOL: return "<bool>";
+    case type_hint::INT: return "<int>";
+    case type_hint::FLOAT: return "<float>";
+    case type_hint::STRING: return "<string>";
+    default: return "<unknown>";
+  }
 }
-
 
 void qarg::parser::parse(int argc, const char *argv[]) {
   for (int i = 1; i < argc; ++i) {
-
     check(argv[i]);
-
   }
 
   flush_option();
+
+  if (spec.find('h') != spec.end() && *get<bool>('h')) {
+    return;
+  }
+
+  for (auto &[k, v] : spec) {
+    if (!v.is_required) { continue; }
+
+    if (options.find(k) == options.end()) {
+      char buf[256];
+      snprintf(buf, 256, "-%c is a required argument", k);
+      throw std::invalid_argument(buf);
+    }
+  }
 }
 
 std::optional<std::string> qarg::parser::operator()(const char c) const {
@@ -45,7 +65,9 @@ std::string qarg::parser::help() const {
     snprintf(
       buf, 256,
       "-%c %-10s %s",
-      k, (v.requires_arg ? "<value>" : ""), v.description.c_str()
+      k,
+      (spec.at(k).requires_arg ? hinttostr(v.hint) : "" ).c_str(),
+      v.description.c_str()
     );
     ss << buf << "\n";
   }
@@ -90,7 +112,7 @@ void qarg::parser::check(const char *arg) {
     }
 
     if (!spec.at(c).requires_arg) {
-      options[c] = "";
+      options[c] = "true";
     } else {
       current_option = c;
     }
