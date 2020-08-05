@@ -56,7 +56,7 @@ namespace qarg {
 
     for (const auto &sv : falsey) {
       if (sl == sv) {
-        return {};
+        return {false};
       }
     }
 
