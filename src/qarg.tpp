@@ -1,8 +1,8 @@
 #ifndef __QARG_TPP__
 #define __QARG_TPP__
-#include <sstream>
-#include <algorithm>
-#include <cctype>
+#include <sstream>    // std::stringstream
+#include <algorithm>  // std::transform
+#include <cctype>     // std::tolower
 
 namespace qarg {
   template <typename T> type_hint tohint();
@@ -73,8 +73,6 @@ namespace qarg {
 
     return *s;
   }
-
-
 }
 
 #endif // __QARG_TPP__

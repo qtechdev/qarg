@@ -1,10 +1,7 @@
-#include <iostream>
-
-#include <cstdio>
-#include <cstring>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
+#include <cstdio>     // std::snprintf
+#include <cstring>    // std::strlen
+#include <fstream>    // std::ifstream
+#include <stdexcept>  // std::invalid_argument
 
 #include <nlohmann/json.hpp>
 
@@ -53,16 +50,14 @@ void qarg::parser::parse(int argc, const char *argv[]) {
     nlohmann::json j;
     ifs >> j;
 
-    for (const auto &e : j.items()) {
+    for (const auto &[k, v] : j.items()) {
       std::stringstream kss;
-      kss << '-' << e.key();
+      kss << '-' << k;
       check(kss.str().c_str());
 
-      std::stringstream css;
-      css << e.value();
-      check(css.str().c_str());
-
-      // std::cout << e.key() << " = " << e.value() << "\n";
+      std::stringstream vss;
+      vss << v;
+      check(vss.str().c_str());
     }
   }
 
@@ -71,7 +66,7 @@ void qarg::parser::parse(int argc, const char *argv[]) {
 
     if (options.find(k) == options.end()) {
       char buf[256];
-      snprintf(buf, 256, "-%c is a required argument", k);
+      std::snprintf(buf, 256, "-%c is a required argument", k);
       throw std::invalid_argument(buf);
     }
   }
@@ -80,7 +75,7 @@ void qarg::parser::parse(int argc, const char *argv[]) {
 std::optional<std::string> qarg::parser::operator()(const char c) const {
   if (spec.find(c) == spec.end()) {
     char buf[256];
-    snprintf(buf, 256, "-%c is not a recognised argument", c);
+    std::snprintf(buf, 256, "-%c is not a recognised argument", c);
     throw std::invalid_argument(buf);
   }
 
@@ -99,7 +94,7 @@ std::string qarg::parser::help() const {
 
   for (auto &[k,v] : spec) {
     char buf[256];
-    snprintf(
+    std::snprintf(
       buf, 256,
       "-%c %-10s %s",
       k,
@@ -144,7 +139,7 @@ void qarg::parser::check(const char *arg) {
     char c = arg[i];
     if (spec.find(c) == spec.end()) {
       char buf[256];
-      snprintf(buf, 256, "-%c is not a recognised argument", c);
+      std::snprintf(buf, 256, "-%c is not a recognised argument", c);
       throw std::invalid_argument(buf);
     }
 
@@ -163,7 +158,7 @@ void qarg::parser::flush_option() {
 
   if (spec[*current_option].requires_arg) {
     char buf[256];
-    snprintf(buf, 256, "-%c requires an argument", *current_option);
+    std::snprintf(buf, 256, "-%c requires an argument", *current_option);
     throw std::invalid_argument(buf);
   }
 
