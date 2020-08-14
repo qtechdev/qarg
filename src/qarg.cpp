@@ -1,10 +1,12 @@
-
 #include <iostream>
 
 #include <cstdio>
 #include <cstring>
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
+
+#include <nlohmann/json.hpp>
 
 #include "qarg.hpp"
 
@@ -18,6 +20,20 @@ std::string qarg::hinttostr(const type_hint t) {
   }
 }
 
+void qarg::parser::config(
+  const char c, const std::string d, const bool r
+) {
+  auto h = type_hint::STRING;
+
+  spec[c].description = d;
+  spec[c].hint = h;
+  spec[c].requires_arg = true;
+  spec[c].is_required = r;
+
+  has_config = true;
+  config_opt = c;
+}
+
 void qarg::parser::parse(int argc, const char *argv[]) {
   for (int i = 1; i < argc; ++i) {
     check(argv[i]);
@@ -27,6 +43,27 @@ void qarg::parser::parse(int argc, const char *argv[]) {
 
   if (spec.find('h') != spec.end() && *get<bool>('h')) {
     return;
+  }
+
+  if (has_config) {
+    std::string config_path = *get<std::string>(config_opt);
+
+    std::ifstream ifs(config_path);
+
+    nlohmann::json j;
+    ifs >> j;
+
+    for (const auto &e : j.items()) {
+      std::stringstream kss;
+      kss << '-' << e.key();
+      check(kss.str().c_str());
+
+      std::stringstream css;
+      css << e.value();
+      check(css.str().c_str());
+
+      // std::cout << e.key() << " = " << e.value() << "\n";
+    }
   }
 
   for (auto &[k, v] : spec) {

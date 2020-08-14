@@ -37,6 +37,11 @@ namespace qarg {
       const bool is_required=false
     );
 
+    void config(
+      const char c, const std::string description="",
+      const bool is_required=false
+    );
+
     void parse(int argc, const char *argv[]);
 
     std::optional<std::string> operator()(const char c) const;
@@ -50,6 +55,8 @@ namespace qarg {
     std::vector<std::string> positional;
     std::optional<char> current_option;
     bool is_parsing_options = true;
+    bool has_config = false;
+    char config_opt = 'c';
 
     void check(const char *arg);
     void flush_option();
