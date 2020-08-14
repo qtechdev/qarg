@@ -1,10 +1,9 @@
+#include <cstdio>     // std::snprintf
+#include <cstring>    // std::strlen
+#include <fstream>    // std::ifstream
+#include <stdexcept>  // std::invalid_argument
 
-#include <iostream>
-
-#include <cstdio>
-#include <cstring>
-#include <sstream>
-#include <stdexcept>
+#include <nlohmann/json.hpp>
 
 #include "qarg.hpp"
 
@@ -18,6 +17,20 @@ std::string qarg::hinttostr(const type_hint t) {
   }
 }
 
+void qarg::parser::config(
+  const char c, const std::string d, const bool r
+) {
+  auto h = type_hint::STRING;
+
+  spec[c].description = d;
+  spec[c].hint = h;
+  spec[c].requires_arg = true;
+  spec[c].is_required = r;
+
+  has_config = true;
+  config_opt = c;
+}
+
 void qarg::parser::parse(int argc, const char *argv[]) {
   for (int i = 1; i < argc; ++i) {
     check(argv[i]);
@@ -29,12 +42,31 @@ void qarg::parser::parse(int argc, const char *argv[]) {
     return;
   }
 
+  if (has_config) {
+    std::string config_path = *get<std::string>(config_opt);
+
+    std::ifstream ifs(config_path);
+
+    nlohmann::json j;
+    ifs >> j;
+
+    for (const auto &[k, v] : j.items()) {
+      std::stringstream kss;
+      kss << '-' << k;
+      check(kss.str().c_str());
+
+      std::stringstream vss;
+      vss << v;
+      check(vss.str().c_str());
+    }
+  }
+
   for (auto &[k, v] : spec) {
     if (!v.is_required) { continue; }
 
     if (options.find(k) == options.end()) {
       char buf[256];
-      snprintf(buf, 256, "-%c is a required argument", k);
+      std::snprintf(buf, 256, "-%c is a required argument", k);
       throw std::invalid_argument(buf);
     }
   }
@@ -43,7 +75,7 @@ void qarg::parser::parse(int argc, const char *argv[]) {
 std::optional<std::string> qarg::parser::operator()(const char c) const {
   if (spec.find(c) == spec.end()) {
     char buf[256];
-    snprintf(buf, 256, "-%c is not a recognised argument", c);
+    std::snprintf(buf, 256, "-%c is not a recognised argument", c);
     throw std::invalid_argument(buf);
   }
 
@@ -62,7 +94,7 @@ std::string qarg::parser::help() const {
 
   for (auto &[k,v] : spec) {
     char buf[256];
-    snprintf(
+    std::snprintf(
       buf, 256,
       "-%c %-10s %s",
       k,
@@ -107,7 +139,7 @@ void qarg::parser::check(const char *arg) {
     char c = arg[i];
     if (spec.find(c) == spec.end()) {
       char buf[256];
-      snprintf(buf, 256, "-%c is not a recognised argument", c);
+      std::snprintf(buf, 256, "-%c is not a recognised argument", c);
       throw std::invalid_argument(buf);
     }
 
@@ -126,7 +158,7 @@ void qarg::parser::flush_option() {
 
   if (spec[*current_option].requires_arg) {
     char buf[256];
-    snprintf(buf, 256, "-%c requires an argument", *current_option);
+    std::snprintf(buf, 256, "-%c requires an argument", *current_option);
     throw std::invalid_argument(buf);
   }
 
