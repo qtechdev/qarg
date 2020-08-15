@@ -55,9 +55,13 @@ void qarg::parser::parse(int argc, const char *argv[]) {
       kss << '-' << k;
       check(kss.str().c_str());
 
-      std::stringstream vss;
-      vss << v;
-      check(vss.str().c_str());
+      if (v.is_string()) {
+        check(std::string(v).c_str());
+      } else {
+        std::stringstream vss;
+        vss << v;
+        check(vss.str().c_str());
+      }
     }
   }
 
