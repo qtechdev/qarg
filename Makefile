@@ -4,17 +4,18 @@ V_MINOR=0
 V_MICRO=0
 LIB_NAME=lib${NAME}.so
 LIB_PATH=out/${LIB_NAME}
-LIB_VER=${LIB_PATH}.${V_MAJOR}.${V_MINOR}.${V_MICRO}
+LIB_PATH_V=${LIB_PATH}.${V_MAJOR}.${V_MINOR}.${V_MICRO}
+LIB_NAME_V=${LIB_NAME}.${V_MAJOR}.${V_MINOR}.${V_MICRO}
 
 CXX=g++
-LD_FLAGS=-Wl,-soname,${LIB_NAME} -shared
+LD_FLAGS=-Wl,-soname,${LIB_NAME}.${V_MAJOR} -shared
 CXX_FLAGS=-std=c++17 -fPIC -Wall -Wextra -pedantic
 
-TESTS_LD_FLAGS=${LIB_VER}
+TESTS_LD_FLAGS=${LIB_PATH_V}
 TESTS_CXX_FLAGS=-std=c++17 -Wall -Wextra -pedantic -Isrc/
 
 SOURCES=$(wildcard src/*.cpp)
-HEADERS=$(wildcard src/*.hpp) $(wildcard src/*.tpp)
+HEADERS=$(wildcard src/*.hpp)
 OBJECTS=$(patsubst src/%,build/%,${SOURCES:.cpp=.o})
 DIRS=$(sort $(dir ${OBJECTS})) build/include
 
@@ -34,15 +35,15 @@ TESTS_CXX_FLAGS += -O2
 endif
 
 .PHONY: all
-all: dirs ${LIB_VER}
+all: dirs ${LIB_PATH_V}
 
 .PHONY: tests
 tests: all ${TESTS}
 
-runtest_%: out/tests/% all
-	LD_PRELOAD=${LIB_VER} $< ${ARGS}
+test_%: out/tests/%
+	LD_PRELOAD=${LIB_PATH_V} $<
 
-${LIB_VER}: ${OBJECTS}
+${LIB_PATH_V}: ${OBJECTS}
 	${CXX} $^ ${LD_FLAGS} -o $@
 
 build/%.o: src/%.cpp
@@ -66,11 +67,7 @@ clean:
 
 .PHONY: install
 install:
-	cp ${LIB_VER} /usr/local/lib
-	mkdir -p /usr/local/include/${NAME}
-	cp -r ${HEADERS} /usr/local/include/${NAME}/
-
-.PHONY: uninstall
-uninstall:
-	rm /usr/local/lib/${LIB_NAME}*
-	rm -r /usr/local/include/${NAME}
+	cp ${LIB_PATH_V} /usr/local/lib/
+	ln -sf ${LIB_NAME_V} /usr/local/lib/${LIB_NAME}
+	mkdir -p /usr/local/include/${NAME}/
+	cp ${HEADERS} /usr/local/include/${NAME}/

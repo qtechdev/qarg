@@ -43,21 +43,26 @@ void qarg::parser::parse(int argc, const char *argv[]) {
   }
 
   if (has_config) {
-    std::string config_path = *get<std::string>(config_opt);
+    auto config_path = get<std::string>(config_opt);
+    if (config_path) {
+      std::ifstream ifs(*config_path);
 
-    std::ifstream ifs(config_path);
+      nlohmann::json j;
+      ifs >> j;
 
-    nlohmann::json j;
-    ifs >> j;
+      for (const auto &[k, v] : j.items()) {
+        std::stringstream kss;
+        kss << '-' << k;
+        check(kss.str().c_str());
 
-    for (const auto &[k, v] : j.items()) {
-      std::stringstream kss;
-      kss << '-' << k;
-      check(kss.str().c_str());
-
-      std::stringstream vss;
-      vss << v;
-      check(vss.str().c_str());
+        if (v.is_string()) {
+          check(std::string(v).c_str());
+        } else {
+          std::stringstream vss;
+          vss << v;
+          check(vss.str().c_str());
+        }
+      }
     }
   }
 

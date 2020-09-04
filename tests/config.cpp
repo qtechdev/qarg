@@ -3,6 +3,7 @@
 #include "qarg.hpp"
 
 constexpr std::string_view expected = (
+  "s == Hello, World!\n"
   "v == true\n"
   "x == 1234\n"
   "y == 5678\n"
@@ -26,6 +27,7 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
   argp.add<bool>('v', "verbose");
   argp.add<int>('x', "x coord", true);
   argp.add<int>('y', "y coord", true);
+  argp.add<std::string>('s', "a string", true);
   argp.config('c', "config file");
 
   try {
@@ -40,6 +42,7 @@ int main([[maybe_unused]] int argc, const char *argv[]) {
   }
 
   std::stringstream ss;
+  ss << "s == " << *argp.get<std::string>('s') << "\n";
   ss << "v == " << std::boolalpha << *argp.get<bool>('v') << "\n";
   ss << "x == " << *argp.get<int>('x') << "\n";
   ss << "y == " << *argp.get<int>('y') << "\n";
